@@ -1,13 +1,15 @@
 package nl.stije.domain;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "OVChipkaart")
 @Table(name = "ov_chipkaart")
-public class OVChipkaart {
+public class OVChipkaart implements Serializable {
+
     @Id
     @Column(name = "kaart_nummer")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +25,30 @@ public class OVChipkaart {
     @JoinColumn(name = "reiziger_id", foreignKey = @ForeignKey(name = "REIZIGER_ID_FK"))
     private Reiziger reiziger;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<Product> producten = new ArrayList<>();
+    @OneToMany(mappedBy = "ovChipkaart", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<OVChipkaartProduct> products = new ArrayList<>();
+
+    public void addProduct(Product product) {
+        OVChipkaartProduct ovChipkaartProduct = new OVChipkaartProduct(this, product);
+        products.add(ovChipkaartProduct);
+        product.getOvChipkaarts().add(ovChipkaartProduct);
+    }
+
+    public void removeProduct(Product product) {
+        OVChipkaartProduct ovChipkaartProduct = new OVChipkaartProduct(this, product);
+        product.getOvChipkaarts().remove(ovChipkaartProduct);
+        products.remove(ovChipkaartProduct);
+        ovChipkaartProduct.setProduct(null);
+        ovChipkaartProduct.setOvChipkaart(null);
+    }
+
+    public List<OVChipkaartProduct> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<OVChipkaartProduct> products) {
+        this.products = products;
+    }
 
     public OVChipkaart(int kaart_nummer, Date geldig_tot, int klasse, float saldo, Reiziger reiziger) {
         this.kaart_nummer = kaart_nummer;
@@ -85,30 +109,8 @@ public class OVChipkaart {
         this.reiziger = reiziger;
     }
 
-    public List<Product> getProducten() {
-        return producten;
-    }
-
-    public void setProducten(ArrayList<Product> producten) {
-        this.producten = producten;
-    }
-
-    public void addProduct(Product product) {
-        if (!producten.contains(product)) {
-            this.producten.add(product);
-            List<OVChipkaart> kaarten = product.getOvChipkaarten();
-            kaarten.add(this);
-            product.setOvChipkaarten(kaarten);
-        }
-    }
-
-    public void removeProduct(Product product) {
-        this.producten.remove(product);
-        product.removeOvChipkaart(this);
-    }
-
     @Override
     public String toString() {
-        return "geldig_tot: " + geldig_tot + ", klasse: " + klasse + ", saldo: " + saldo;
+        return "geldig_tot: " + geldig_tot + ", klasse: " + klasse + ", saldo: " + saldo + ", aantal producten: " + products.size();
     }
 }

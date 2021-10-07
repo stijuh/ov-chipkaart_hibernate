@@ -1,13 +1,14 @@
 package nl.stije.domain;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Entity
 @Table(name = "product")
-public class Product {
+public class Product implements Serializable {
     @Id
     @Column(name = "product_nummer")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +23,12 @@ public class Product {
     @Column(name = "prijs")
     private float prijs;
 
-    @ManyToMany(mappedBy = "producten", cascade = {CascadeType.ALL})
-    private List<OVChipkaart> ovChipkaarten = new ArrayList<>();
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<OVChipkaartProduct> ovChipkaarts = new ArrayList<>();
+
+    public List<OVChipkaartProduct> getOvChipkaarts() {
+        return ovChipkaarts;
+    }
 
     public Product() {}
 
@@ -64,22 +69,6 @@ public class Product {
 
     public void setPrijs(float prijs) {
         this.prijs = prijs;
-    }
-
-    public List<OVChipkaart> getOvChipkaarten() {
-        return ovChipkaarten;
-    }
-
-    public void setOvChipkaarten(List<OVChipkaart> ovChipkaarten) {
-        this.ovChipkaarten = ovChipkaarten;
-    }
-
-    public void addOvChipkaart(OVChipkaart ovChipkaart) {
-        ovChipkaart.addProduct(this);
-    }
-
-    public void removeOvChipkaart(OVChipkaart ovChipkaart) {
-        this.ovChipkaarten.remove(ovChipkaart);
     }
 
     @Override
