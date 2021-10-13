@@ -13,45 +13,41 @@ public class OVChipkaart implements Serializable {
     @Id
     @Column(name = "kaart_nummer")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int kaart_nummer;
+    private Long id;
     private Date geldig_tot;
     private int klasse;
     private float saldo;
 
     @Column(name = "reiziger_id", insertable = false, updatable = false)
-    private int reiziger_id;
+    private Long reiziger_id;
 
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "reiziger_id", foreignKey = @ForeignKey(name = "REIZIGER_ID_FK"))
     private Reiziger reiziger;
 
-    @OneToMany(mappedBy = "ovChipkaart", cascade = {CascadeType.ALL}, orphanRemoval = true)
-    private List<OVChipkaartProduct> products = new ArrayList<>();
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "ov_chipkaart_product", joinColumns = {@JoinColumn(name = "kaart_nummer")}, inverseJoinColumns = { @JoinColumn(name = "product_nummer")})
+    private List<Product> producten = new ArrayList<>();
 
     public void addProduct(Product product) {
-        OVChipkaartProduct ovChipkaartProduct = new OVChipkaartProduct(this, product);
-        products.add(ovChipkaartProduct);
-        product.getOvChipkaarts().add(ovChipkaartProduct);
+        producten.add(product);
+        product.getOvChipkaarten().add(this);
     }
 
     public void removeProduct(Product product) {
-        OVChipkaartProduct ovChipkaartProduct = new OVChipkaartProduct(this, product);
-        product.getOvChipkaarts().remove(ovChipkaartProduct);
-        products.remove(ovChipkaartProduct);
-        ovChipkaartProduct.setProduct(null);
-        ovChipkaartProduct.setOvChipkaart(null);
+        producten.remove(product);
+        product.getOvChipkaarten().remove(this);
     }
 
-    public List<OVChipkaartProduct> getProducts() {
-        return products;
+    public List<Product> getProducten() {
+        return producten;
     }
 
-    public void setProducts(List<OVChipkaartProduct> products) {
-        this.products = products;
+    public void setProducts(List<Product> producten) {
+        this.producten = producten;
     }
 
-    public OVChipkaart(int kaart_nummer, Date geldig_tot, int klasse, float saldo, Reiziger reiziger) {
-        this.kaart_nummer = kaart_nummer;
+    public OVChipkaart(Date geldig_tot, int klasse, float saldo, Reiziger reiziger) {
         this.geldig_tot = geldig_tot;
         this.klasse = klasse;
         this.saldo = saldo;
@@ -61,12 +57,12 @@ public class OVChipkaart implements Serializable {
 
     public OVChipkaart() {}
 
-    public int getKaart_nummer() {
-        return kaart_nummer;
+    public Long getKaart_nummer() {
+        return id;
     }
 
-    public void setKaart_nummer(int kaart_nummer) {
-        this.kaart_nummer = kaart_nummer;
+    public void setKaart_nummer(Long kaart_nummer) {
+        this.id = kaart_nummer;
     }
 
     public Date getGeldig_tot() {
@@ -93,11 +89,11 @@ public class OVChipkaart implements Serializable {
         this.saldo = saldo;
     }
 
-    public int getReiziger_id() {
+    public Long getReiziger_id() {
         return reiziger_id;
     }
 
-    public void setReiziger_id(int reiziger_id) {
+    public void setReiziger_id(Long reiziger_id) {
         this.reiziger_id = reiziger_id;
     }
 
@@ -111,6 +107,6 @@ public class OVChipkaart implements Serializable {
 
     @Override
     public String toString() {
-        return "geldig_tot: " + geldig_tot + ", klasse: " + klasse + ", saldo: " + saldo + ", aantal producten: " + products.size();
+        return "geldig_tot: " + geldig_tot + ", klasse: " + klasse + ", saldo: " + saldo + ", aantal producten: " + producten.size();
     }
 }

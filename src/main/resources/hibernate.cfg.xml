@@ -11,13 +11,12 @@
     <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
 
     <!-- DB schema will be updated if needed -->
-     <property name="hibernate.hbm2ddl.auto">update</property>
+     <property name="hibernate.hbm2ddl.auto">create</property>
      <property name="hibernate.show_sql">false</property>
 
-     <mapping class="nl.stije.domain.Reiziger"/>
+     <mapping class="nl.stije.domain.Reiziger" />
      <mapping class="nl.stije.domain.Product"/>
      <mapping class="nl.stije.domain.OVChipkaart"/>
      <mapping class="nl.stije.domain.Adres"/>
-     <mapping class="nl.stije.domain.OVChipkaartProduct"/>
   </session-factory>
 </hibernate-configuration>
